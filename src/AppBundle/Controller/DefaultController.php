@@ -139,6 +139,38 @@ class DefaultController extends Controller
     }
 
     /**
+     * @Route("/api/v1/listLocation", name="listLocation")
+     */
+    public function listLocation(Request $request)
+    {
+        // $au_postcodes = json_decode(file_get_contents('au_postcodes.json'));
+        // $result = [];
+        // foreach ($au_postcodes as $suburb) {
+        //   if (!in_array($suburb->place_name, $result)) $result[] = $suburb->place_name;
+        // }
+        $result = json_decode(file_get_contents('listLocation.json'));
+        $response = new Response(json_encode($result));
+        $response->headers->set('Content-Type', 'application/json');
+        return $response;
+    }
+
+    /**
+     * @Route("/api/v1/listPostcode", name="listPostcode")
+     */
+    public function listPostcode(Request $request)
+    {
+        // $au_postcodes = json_decode(file_get_contents('au_postcodes.json'));
+        // $result = [];
+        // foreach ($au_postcodes as $suburb) {
+        //   if (!in_array($suburb->postcode, $result)) $result[] = $suburb->postcode;
+        // }
+        $result = json_decode(file_get_contents('listPostcode.json'));
+        $response = new Response(json_encode($result));
+        $response->headers->set('Content-Type', 'application/json');
+        return $response;
+    }
+
+    /**
      * @Route("/discover", name="discover")
      */
     public function indexDiscover(Request $request)

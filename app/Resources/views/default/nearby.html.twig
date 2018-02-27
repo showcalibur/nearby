@@ -29,11 +29,11 @@
         <script>
           document.getElementById("text-location").addEventListener("click", function(e){
               document.getElementById("text-postcode").value = "";
-          })
+          });
 
           document.getElementById("text-postcode").addEventListener("click", function(e){
               document.getElementById("text-location").value = "";
-          })
+          });
 
           document.getElementById("btn-search").addEventListener("click", function(e){
           	e.preventDefault()
@@ -94,6 +94,22 @@
           function showResult(response) {
             $("#btn-modal").click();
           }
+
+          $( document ).ready(function() {
+
+              ajax_get('/api/v1/listLocation', function(data){
+                  $('#text-location').typeahead({
+                      source: JSON.parse(data)
+                  });
+              });
+
+              ajax_get('/api/v1/listPostcode', function(data){
+                  $('#text-postcode').typeahead({
+                      source: JSON.parse(data)
+                  });
+              });
+          });
+
 
         </script>
 
