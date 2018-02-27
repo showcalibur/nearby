@@ -112,11 +112,103 @@ class DefaultController extends Controller
 
           if ($latOk && $lngOk) $result[] = $suburb;
         }
-        
+
         $result_num = count($result);
         $response = new Response(json_encode($result));
         $response->headers->set('Content-Type', 'application/json');
 
         return $response;
+    }
+
+    private function distanceCalculation($point1_lat, $point1_long, $point2_lat, $point2_long, $unit = 'km', $decimals = 2) {
+        // Calculate the distance in degrees
+        $degrees = rad2deg(acos((sin(deg2rad($point1_lat))*sin(deg2rad($point2_lat))) + (cos(deg2rad($point1_lat))*cos(deg2rad($point2_lat))*cos(deg2rad($point1_long-$point2_long)))));
+
+        // Convert the distance in degrees to the chosen unit (kilometres, miles or nautical miles)
+        switch($unit) {
+            case 'km':
+                $distance = $degrees * 111.13384; // 1 degree = 111.13384 km, based on the average diameter of the Earth (12,735 km)
+                  break;
+            case 'mi':
+                $distance = $degrees * 69.05482; // 1 degree = 69.05482 miles, based on the average diameter of the Earth (7,913.1 miles)
+                  break;
+            case 'nmi':
+                $distance =  $degrees * 59.97662; // 1 degree = 59.97662 nautic miles, based on the average diameter of the Earth (6,876.3 nautical miles)
+        }
+        return round($distance, $decimals);
+    }
+
+    /**
+     * @Route("/discover", name="discover")
+     */
+    public function indexDiscover(Request $request)
+    {
+          $name = strtolower($request->query->get('name'));
+          $postcode = strtolower($request->query->get('postcode'));
+          $au_postcodes = json_decode(file_get_contents('au_postcodes.json'));
+          $result = [];
+          if (!empty($name)) {
+              foreach ($au_postcodes as $suburb) {
+                if (strtolower($suburb->place_name) == $name) $result[] = $suburb;
+              }
+          }
+          elseif (!empty($postcode)) {
+              foreach ($au_postcodes as $suburb) {
+                if ($suburb->postcode == $code) $result[] = $suburb;
+              }
+          }
+
+          if (isset($result[0])) {
+              $origin = $result[0];
+          }
+          else {
+              die("Result not found!");
+          }
+
+
+          $lat = (float) $origin->latitude;
+          $lng = (float) $origin->longitude;
+          $distance = (float) $request->query->get('distance');
+          $unit = 'km';
+
+          // radius of earth; @note: the earth is not perfectly spherical, but this is considered the 'mean radius'
+          if ($unit == 'km') $radius = 6371.009; // in kilometers
+          elseif ($unit == 'mi') $radius = 3958.761; // in miles
+
+          // latitude boundaries
+          $maxLat = (float) $lat + rad2deg($distance / $radius);
+          $minLat = (float) $lat - rad2deg($distance / $radius);
+
+          // longitude boundaries (longitude gets smaller when latitude increases)
+          $maxLng = (float) $lng + rad2deg($distance / $radius / cos(deg2rad((float) $lat)));
+          $minLng = (float) $lng - rad2deg($distance / $radius / cos(deg2rad((float) $lat)));
+
+          // finding nearby
+          $au_postcodes = json_decode(file_get_contents('au_postcodes.json'));
+          $result = [];
+          foreach ($au_postcodes as $suburb) {
+            $currentLatitude = (float) $suburb->latitude;
+            $currentLongitude = (float) $suburb->longitude;
+            $latOk = ($currentLatitude > $minLat) && ($currentLatitude < $maxLat);
+            $lngOk = ($currentLongitude > $minLng) && ($currentLatitude < $maxLng);
+
+            if ($latOk && $lngOk) {
+                $suburb = (array) $suburb;
+                $suburb['distance'] = $this->distanceCalculation($origin->latitude, $origin->longitude, $currentLatitude, $currentLongitude);
+                $suburb = (object) $suburb;
+                $mydistance = (float) $suburb->distance;
+                if ($mydistance <= $distance) $result[] = $suburb;
+            }
+          }
+
+          $result_num = count($result);
+
+        return $this->render('default/discover.html.twig', [
+            'center_latitude' => $lat,
+            'center_longitude' => $lng,
+            'locations' => json_encode($result),
+            'locations_num' => $result_num,
+            'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR,
+        ]);
     }
 }

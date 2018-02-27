@@ -41,6 +41,7 @@
             if (document.getElementById("text-postcode").value == "") {
                 var name = document.getElementById("text-location").value;
                 var distance = document.getElementById("text-distance").value;
+                /*
                 ajax_get('/api/v1/searchByName?name=' + name, function(data){
                     data = JSON.parse(data);
                     ajax_get('/api/v1/searchNearby?lat= ' + data[0].latitude + '&lng=' + data[0].longitude +
@@ -59,10 +60,13 @@
                       showResult(response)
                     })
                 })
+                */
+                location.href = "/discover?name=" + name + "&distance=" + distance + "&unit=km";
             }
             else if (document.getElementById("text-location").value == "") {
                 var postcode = document.getElementById("text-postcode").value;
                 var distance = document.getElementById("text-distance").value;
+                /*
                 ajax_get('/api/v1/searchByPostcode?code=' + postcode, function(data){
                     data = JSON.parse(data);
                     ajax_get('/api/v1/searchNearby?lat= ' + data[0].latitude + '&lng=' + data[0].longitude +
@@ -81,6 +85,8 @@
                       showResult(response)
                     })
                 })
+                */
+                location.href = "/discover?postcode=" + postcode + "&distance=" + distance + "&unit=km";
             }
 
           });

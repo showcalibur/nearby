@@ -1,0 +1,81 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<script type="text/javascript">
+
+function initMap(){
+  //  var locations = JSON.parse('[{"name":"Stintino","lat":"40.94013320","lng":"8.223588900000"},{"name":"Cagliari","lat":"39.22384110","lng":"9.121661300000"},{"name":"La maddalena","lat":"41.21655380","lng":"9.404712200000"},{"name":"Sassari","lat":"40.72592690","lng":"8.555682600000"},{"name":"Oristano","lat":"39.90618200","lng":"8.588386300000"}]');
+    var locations = '{{ locations }}';
+    locations = locations.replace(/&quot;/g, '"');
+    locations = JSON.parse(locations);
+
+    table_row = '';
+    table_row_num = 0;
+    locations.forEach(function(row) {
+      table_row_num++;
+       table_row += '<tr>';
+       table_row += '<td>' + table_row_num + '</td>';
+       table_row += '<td>' + row.postcode + '</td>';
+       table_row += '<td>' + row.place_name + '</td>';
+       table_row += '<td>' + row.state_name + '</td>';
+       table_row += '<td>' + row.state_code + '</td>';
+       table_row += '</tr>';
+    });
+    document.getElementById("search-result").innerHTML = table_row;
+
+    var map = new google.maps.Map(document.getElementById('wsMap'), {
+      zoom: 10,
+      center: new google.maps.LatLng({{ center_latitude }}, {{ center_longitude }})
+    });
+    var infowindow = new google.maps.InfoWindow();
+    var marker, i;
+
+
+    for (i = 0; i < locations.length; i++) {
+        marker = new google.maps.Marker({
+            position: new google.maps.LatLng(locations[i]['latitude'], locations[i]['longitude']),
+            map: map
+        });
+        google.maps.event.addListener(marker, 'click', (function(marker, i) {
+        return function() {
+            var info = "Name: " + locations[i]['place_name'] + "<br>";
+            info += "Postcode: " + locations[i]['postcode'] + "<br>";
+            info += "State: " + locations[i]['state_name'] + ", " + locations[i]['state_code'] + "<br>";
+            info += "Distance: " + locations[i]['distance'] + " km";
+
+            infowindow.setContent(info);
+            infowindow.open(map, marker);
+            }
+        })(marker, i));
+    }
+}
+
+</script>
+
+<center><h1>Search Nearby Application</span> for Australian Post Codes</h1></center>
+
+<div id="wsMap" style="width: 70%; height:500px; margin: 0px auto;"></div>
+<br>
+
+<center><h3>Found {{ locations_num }} location :</h3></center>
+
+<table id="table-search-result" class="table table-striped table-bordered" cellspacing="0" style="width: 70%;margin: 0px auto;">
+  <thead>
+      <tr>
+          <th>#</th>
+          <th>Post Code</th>
+          <th>Place Name</th>
+          <th>State Name</th>
+          <th>State Code</th>
+      </tr>
+  </thead>
+  <tbody id="search-result">
+  </tbody>
+</table>
+<br>
+<br>
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBr7vFg9finISWkUlRUzdfGFTN9J0rkgzc&callback=initMap"
+  type="text/javascript"></script>
+
+{% endblock %}
