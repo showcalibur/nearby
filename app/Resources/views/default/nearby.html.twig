@@ -8,15 +8,27 @@
             </div>
 
             <div id="next">
+                <div class="form-group col-md-6">
+                    <label for="text-location">Location Name or Postcode <br />(e.g Sydney, Melbourne, 2000, 3000)</label>
+                    <input type="text" class="form-control" id="text-location">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="text-distance">Set Radius Distance <br />(in Kilometers e.g 15):</label>
+                    <input type="text" class="form-control" id="text-distance" style="width: 70px;" value="15">
+                </div>
+
+
+                <!--
                 Please enter Location Name here (e.g Sydney, Eldorado) : <input id="text-location" name="city" value="" />
                 <br><br>
                 OR<br><br>
 
-                Please enter Postcode here (e.g 2000, 3500): <input id="text-postcode" name="postcode" value="" />
+                Please enter Postcode here (e.g 2000, 3500): <input class="placeholder" id="text-postcode" name="postcode" value="" />
                 <br><br>
 
                 Please enter distance (in Kilometers e.g 15): <input id="text-distance" name="postcode" value="15" />
                 <br>
+                -->
 
             </div>
             <br><br>
@@ -31,64 +43,19 @@
               document.getElementById("text-postcode").value = "";
           });
 
+          /*
           document.getElementById("text-postcode").addEventListener("click", function(e){
               document.getElementById("text-location").value = "";
           });
+          */
 
           document.getElementById("btn-search").addEventListener("click", function(e){
-          	e.preventDefault()
+          	e.preventDefault();
 
-            if (document.getElementById("text-postcode").value == "") {
-                var name = document.getElementById("text-location").value;
-                var distance = document.getElementById("text-distance").value;
-                /*
-                ajax_get('/api/v1/searchByName?name=' + name, function(data){
-                    data = JSON.parse(data);
-                    ajax_get('/api/v1/searchNearby?lat= ' + data[0].latitude + '&lng=' + data[0].longitude +
-                      '&distance=' + distance + '&unit=km', function(response){
-                      var result = '';
-                      response = JSON.parse(response);
-                      response.forEach(function(row) {
-                         result += '<tr>';
-                         result += '<td>' + row.postcode + '</td>';
-                         result += '<td>' + row.place_name + '</td>';
-                         result += '<td>' + row.state_name + '</td>';
-                         result += '<td>' + row.state_code + '</td>';
-                         result += '</tr>';
-                      });
-                      document.getElementById("search-result").innerHTML = result;
-                      showResult(response)
-                    })
-                })
-                */
-                location.href = "/discover?name=" + name + "&distance=" + distance + "&unit=km";
-            }
-            else if (document.getElementById("text-location").value == "") {
-                var postcode = document.getElementById("text-postcode").value;
-                var distance = document.getElementById("text-distance").value;
-                /*
-                ajax_get('/api/v1/searchByPostcode?code=' + postcode, function(data){
-                    data = JSON.parse(data);
-                    ajax_get('/api/v1/searchNearby?lat= ' + data[0].latitude + '&lng=' + data[0].longitude +
-                      '&distance=' + distance + '&unit=km', function(response){
-                      var result = '';
-                      response = JSON.parse(response);
-                      response.forEach(function(row) {
-                         result += '<tr>';
-                         result += '<td>' + row.postcode + '</td>';
-                         result += '<td>' + row.place_name + '</td>';
-                         result += '<td>' + row.state_name + '</td>';
-                         result += '<td>' + row.state_code + '</td>';
-                         result += '</tr>';
-                      });
-                      document.getElementById("search-result").innerHTML = result;
-                      showResult(response)
-                    })
-                })
-                */
-                location.href = "/discover?postcode=" + postcode + "&distance=" + distance + "&unit=km";
-            }
-
+            var name = document.getElementById("text-location").value;
+            var distance = document.getElementById("text-distance").value;
+            location.href = "/discover?name=" + name + "&distance=" + distance + "&unit=km";
+            
           });
 
           function showResult(response) {
@@ -97,17 +64,21 @@
 
           $( document ).ready(function() {
 
+              $("#text-location").focus();
+
               ajax_get('/api/v1/listLocation', function(data){
                   $('#text-location').typeahead({
                       source: JSON.parse(data)
                   });
               });
 
+              /*
               ajax_get('/api/v1/listPostcode', function(data){
                   $('#text-postcode').typeahead({
                       source: JSON.parse(data)
                   });
               });
+              */
           });
 
 

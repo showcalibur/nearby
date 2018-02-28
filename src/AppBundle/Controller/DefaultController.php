@@ -146,9 +146,9 @@ class DefaultController extends Controller
         // $au_postcodes = json_decode(file_get_contents('au_postcodes.json'));
         // $result = [];
         // foreach ($au_postcodes as $suburb) {
-        //   if (!in_array($suburb->place_name, $result)) $result[] = $suburb->place_name;
+        //   if (!in_array($suburb->place_name, $result)) $result[] = $suburb->postcode." - ".$suburb->place_name;
         // }
-        $result = json_decode(file_get_contents('listLocation.json'));
+        $result = json_decode(file_get_contents('listCombined.json'));
         $response = new Response(json_encode($result));
         $response->headers->set('Content-Type', 'application/json');
         return $response;
@@ -175,13 +175,15 @@ class DefaultController extends Controller
      */
     public function indexDiscover(Request $request)
     {
-          $name = strtolower($request->query->get('name'));
+          $name = $request->query->get('name');
+          $name = explode('-', $name);
+          $name = trim($name[1]);
           $postcode = strtolower($request->query->get('postcode'));
           $au_postcodes = json_decode(file_get_contents('au_postcodes.json'));
           $result = [];
           if (!empty($name)) {
               foreach ($au_postcodes as $suburb) {
-                if (strtolower($suburb->place_name) == $name) $result[] = $suburb;
+                if (strtolower($suburb->place_name) == strtolower($name)) $result[] = $suburb;
               }
           }
           elseif (!empty($postcode)) {
@@ -236,6 +238,7 @@ class DefaultController extends Controller
           $result_num = count($result);
 
         return $this->render('default/discover.html.twig', [
+            'center_location_name' => $name,
             'center_latitude' => $lat,
             'center_longitude' => $lng,
             'locations' => json_encode($result),
